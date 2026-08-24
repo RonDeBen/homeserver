@@ -1,0 +1,17 @@
+# Recurring schedules — the source of truth for cron-driven triggers.
+#
+# The orchestrator syncs this into the `schedules` table on startup (upsert by
+# name; entries removed here are pruned from the table). Adding a recurring job
+# is a diffable edit here — no code change.
+#
+# `cron` is a 6-field expression (the `cron` crate): SEC MIN HOUR DOM MON DOW.
+# So "0 0 6 * * *" = every day at 06:00:00. `subject` + `payload` are what gets
+# published on the bus when due; jobs already subscribed react. `payload`
+# defaults to {} (which deserializes into empty trigger events like
+# CalendarRefresh).
+
+[[schedule]]
+name    = "calendar-daily-refresh"
+cron    = "0 0 6 * * *"        # 06:00 every day
+subject = "calendar.refresh"
+payload = {}

@@ -1,0 +1,38 @@
+# Infrastructure only. Jobs (calendar, etc.) run on the host via `cargo run`
+# for a fast dev loop; they'll get their own compose services once they're
+# long-running daemons rather than batch jobs.
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    command: ["-c", "/etc/nats/nats-server.conf"]
+    ports:
+      - "4222:4222" # client connections
+      - "8222:8222" # monitoring
+      - "1883:1883" # MQTT (devices)
+    volumes:
+      - ./deploy/nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+      - nats-data:/data
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: homeserver
+      POSTGRES_PASSWORD: homeserver
+      POSTGRES_DB: homeserver
+    # Host 5433 to avoid clashing with another local Postgres on 5432.
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeserver"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  nats-data:
+  pg-data:
