@@ -4,6 +4,7 @@
 //! `ctx.db` and `ctx.bus`. Keeping this in one crate means jobs don't each
 //! reinvent connection setup or logging.
 
+pub mod auth;
 pub mod bus;
 pub mod config;
 pub mod db;

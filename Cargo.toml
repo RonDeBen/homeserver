@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/common", "crates/calendar", "crates/hsctl", "crates/orchestrator"]
+members = ["crates/common", "crates/calendar", "crates/hsctl", "crates/orchestrator", "crates/health", "crates/gateway"]
 
 [workspace.package]
 edition = "2021"
@@ -30,3 +30,24 @@ futures = "0.3"
 cron = "0.12"
 toml = "0.8"
 humantime = "2"
+# Calendar source ingestion: HTTP fetch + per-format parsers.
+async-trait = "0.1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "rustls-tls",
+    "gzip",
+] }
+ical = "0.11"
+feed-rs = "2"
+scraper = "0.21"
+chrono-tz = "0.10"
+regex = "1"
+# Gateway (web/API surface): HTTP server, HTML templating, hypermedia live push.
+axum = "0.8"
+tower-http = { version = "0.6", features = ["trace"] }
+maud = "0.26"
+datastar = { version = "0.3", features = ["axum"] }
+async-stream = "0.3"
+http = "1"
+subtle = "2"
+# Embed the vendored boro asset tree into the binary (single-binary deploy).
+include_dir = "0.7"

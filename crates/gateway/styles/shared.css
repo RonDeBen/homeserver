@@ -1,0 +1,414 @@
+
+@layer shared, feature, utilities;
+@layer shared {
+/* ── Tokens ─────────────────────────────────────────────────────────────────
+   The portable artifact: names here are the contract the SwiftUI theme mirrors.
+   Palette is dark-primary (matches the mockups) but everything is a role, so a
+   light mode stays reachable. */
+:root {
+  color-scheme: dark;
+  --bg:            #101219;
+  --bg-2:          #0b0d12;
+
+  /* card surfaces + paired text/muted/stitch, one set per fabric material.
+     Six materials (brief §7). `denim` is kept as a back-compat alias of the
+     informational `faded-blue`; `indigo` is the deeper signature material. */
+  --linen:      #e7dec8;  --on-linen:      #2a2620;  --mut-linen:      #6f6552;  --stitch-linen:      #b7a883;
+  --charcoal:   #14161d;  --on-charcoal:   #d5dad4;  --mut-charcoal:   #9aa196;  --stitch-charcoal:   #2a2f39;
+  --faded-blue: #2b3a52;  --on-faded-blue: #e6ecf5;  --mut-faded-blue: #b3bdcf;  --stitch-faded-blue: #43587a;
+  --indigo:     #232a4d;  --on-indigo:     #e2e5f4;  --mut-indigo:     #a9adcb;  --stitch-indigo:     #3b4483;
+  --olive:      #2d3826;  --on-olive:      #e2e7d5;  --mut-olive:      #bac6a6;  --stitch-olive:      #46542f;
+  --rust:       #4f241d;  --on-rust:       #f2e2d5;  --mut-rust:       #dcb2a0;  --stitch-rust:       #703629;
+  /* legacy alias — existing markup that still says `card--denim` maps to faded-blue */
+  --denim:      var(--faded-blue);  --on-denim: var(--on-faded-blue);  --mut-denim: var(--mut-faded-blue);  --stitch-denim: var(--stitch-faded-blue);
+
+  /* accents + chart threads */
+  --accent:      #dfa64a;
+  --accent-soft: #8a6a2f;
+  --thread-sage: #9cb380;
+  --thread-rust: #cb6f4d;
+  --thread-blue: #6f97c4;
+  --ok:          #7fa86a;
+  --warn:        #c8623f;
+
+  /* type */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-body:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* space / radius / stitch */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem; --s-6: 2rem;
+  --radius: 12px;
+  --stitch-w: 1.5px; --stitch-dash: 6px; --stitch-gap: 5px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden; /* corner patches overhang cards by a few px; don't let that scroll the page */
+  font: 16px/1.55 var(--font-body);
+  color: var(--on-charcoal);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #171a23 0%, transparent 60%),
+    var(--bg);
+}
+
+/* Cats are near-black silhouettes; a tight light rim keeps them legible even on
+   the near-black nav (otherwise only their amber eyes read). */
+.brand__cat { filter: drop-shadow(0 0 0.7px rgba(240,232,214,0.6)); }
+
+/* ── Shell + left nav ──────────────────────────────────────────────────────── */
+.shell { display: flex; align-items: flex-start; gap: var(--s-5); min-height: 100vh; }
+
+.nav {
+  flex: 0 0 210px;
+  position: sticky; top: 0;
+  align-self: stretch;
+  padding: var(--s-5) var(--s-4);
+  background: var(--bg-2);
+  border-right: 1px dashed color-mix(in srgb, var(--stitch-charcoal) 80%, transparent);
+  display: flex; flex-direction: column; gap: var(--s-5);
+}
+.brand { position: relative; padding-bottom: var(--s-4); }
+.brand__name {
+  display: block; font-family: var(--font-display);
+  font-size: 1.5rem; letter-spacing: 0.12em; color: #f0e7d2;
+}
+.brand__sub { display: block; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--mut-charcoal); }
+.brand__cat { position: absolute; right: 6px; top: 2px; width: 52px; height: auto; }
+
+.nav__links { display: flex; flex-direction: column; gap: var(--s-1); }
+.nav__link {
+  display: block; padding: 0.6rem 0.8rem; min-height: 44px;
+  border-radius: 10px; text-decoration: none;
+  color: color-mix(in srgb, var(--on-charcoal) 78%, transparent);
+  font-weight: 600; letter-spacing: 0.01em;
+}
+.nav__link:hover { color: var(--on-charcoal); background: color-mix(in srgb, #fff 4%, transparent); }
+.nav__link.is-active {
+  /* the stitched leather tab */
+  color: #f3e3c4;
+  background: linear-gradient(145deg, #5a3a22, #3f2716);
+  box-shadow: inset 0 0 0 var(--stitch-w) transparent, 0 1px 0 rgba(0,0,0,0.4);
+  position: relative;
+}
+.nav__link.is-active::after {
+  content: ""; position: absolute; inset: 4px;
+  border: var(--stitch-w) dashed #caa877; border-radius: 7px; opacity: 0.7;
+  pointer-events: none;
+}
+.nav__status { margin-top: auto; display: flex; align-items: center; gap: var(--s-2); font-size: 0.8rem; color: var(--mut-charcoal); }
+.nav__status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+
+.container { flex: 1 1 auto; min-width: 0; width: 100%; max-width: 68rem; padding: var(--s-5) var(--s-5) var(--s-6) 0; container-type: inline-size; }
+
+/* ── Page header ───────────────────────────────────────────────────────────── */
+.page-head { margin: 0 0 var(--s-5); }
+.page-head h1 { font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem); margin: 0; color: #f1e8d5; }
+.page-head p { margin: 0.25rem 0 0; color: var(--mut-charcoal); }
+
+/* ── Bento grid ────────────────────────────────────────────────────────────── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-auto-rows: minmax(120px, auto);
+  grid-auto-flow: dense;
+  gap: var(--s-4);
+}
+
+/* ── Card: the boro panel ──────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  padding: var(--s-4);
+  border-radius: var(--radius);
+  background-color: var(--surface, var(--charcoal));
+  /* real woven-cloth texture per material (falls back to the color alone) */
+  background-image: var(--mat-tex, none);
+  background-size: 340px;
+  color: var(--on, var(--on-charcoal));
+  border: 1px solid color-mix(in srgb, var(--stitch, var(--stitch-charcoal)) 90%, transparent);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.35), 0 6px 18px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; gap: var(--s-3);
+  min-width: 0;
+}
+/* the running-stitch, inset from the edge */
+.card::after {
+  content: ""; position: absolute; inset: 7px;
+  border: var(--stitch-w) dashed color-mix(in srgb, var(--stitch, var(--stitch-charcoal)) 85%, transparent);
+  border-radius: calc(var(--radius) - 5px);
+  pointer-events: none;
+}
+.card--linen    { --surface: var(--linen);    --on: var(--on-linen);    --mut: var(--mut-linen);    --stitch: var(--stitch-linen); }
+.card--denim    { --surface: var(--denim);    --on: var(--on-denim);    --mut: var(--mut-denim);    --stitch: var(--stitch-denim); }
+.card--olive    { --surface: var(--olive);    --on: var(--on-olive);    --mut: var(--mut-olive);    --stitch: var(--stitch-olive); }
+.card--rust     { --surface: var(--rust);     --on: var(--on-rust);     --mut: var(--mut-rust);     --stitch: var(--stitch-rust); }
+.card--charcoal { --surface: var(--charcoal); --on: var(--on-charcoal); --mut: var(--mut-charcoal); --stitch: var(--stitch-charcoal); }
+
+/* corner patches — pure CSS decoration keyed by a modifier class */
+.card--patch-sashiko::before,
+.card--patch-calico::before {
+  content: ""; position: absolute; top: -8px; right: -8px;
+  width: 72px; height: 72px; transform: rotate(6deg);
+  background: no-repeat center / contain; pointer-events: none; z-index: 1;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+}
+.card--patch-sashiko::before { background-image: url("/static/patch-sashiko.svg"); }
+.card--patch-calico::before  { background-image: url("/static/patch-calico.svg"); transform: rotate(-5deg); }
+
+.card__title {
+  margin: 0; font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--mut, var(--mut-charcoal));
+}
+.card__lead { font-family: var(--font-display); font-size: 1.5rem; margin: 0; }
+.card__surface > :where(p, ul, ol) { margin-block: 0; }
+.card__surface a { color: inherit; }
+.card .muted { color: var(--mut, var(--mut-charcoal)); }
+.card__foot { margin-top: auto; font-size: 0.8rem; }
+.card__link { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem; }
+.card__link:hover { text-decoration: underline; }
+
+/* ── Stat ──────────────────────────────────────────────────────────────────── */
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat__value { font-family: var(--font-mono); font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.stat__label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut, var(--mut-charcoal)); }
+.stat-row { display: flex; flex-wrap: wrap; gap: var(--s-5) var(--s-6); }
+
+/* ── List / row (calendar events, service rows) ────────────────────────────── */
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.row { display: grid; gap: 2px; padding: var(--s-2) 0; border-top: 1px dashed color-mix(in srgb, var(--stitch, var(--stitch-charcoal)) 55%, transparent); }
+.row:first-child { border-top: 0; }
+.row .when { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--mut, var(--mut-charcoal)); font-size: 0.82rem; }
+.row .title { font-weight: 600; }
+.row .title a { color: inherit; text-decoration: none; }
+.row .title a:hover { color: var(--accent); }
+.row .meta { color: var(--mut, var(--mut-charcoal)); font-size: 0.82rem; }
+.badge { display: inline-block; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+         padding: 1px 7px; border-radius: 999px; color: var(--mut, var(--mut-charcoal));
+         border: 1px dashed color-mix(in srgb, var(--stitch, var(--stitch-charcoal)) 70%, transparent); }
+
+/* ── Panel: the calm content surface (charts, calendar grids live here) ─────── */
+.panel {
+  background: var(--bg-2);
+  border-radius: 8px;
+  padding: var(--s-3);
+  border: 1px solid color-mix(in srgb, var(--stitch-charcoal) 60%, transparent);
+  overflow: hidden; /* the calm content surface clips charts/grids; the card stays visible (brief §13) */
+}
+.panel .grid-line { stroke: color-mix(in srgb, #fff 8%, transparent); stroke-width: 1; }
+.thread-sage { stroke: var(--thread-sage); }
+.thread-rust { stroke: var(--thread-rust); }
+.thread-blue { stroke: var(--thread-blue); }
+.chart svg { display: block; width: 100%; height: auto; }
+
+/* ── Log / quote flavor ────────────────────────────────────────────────────── */
+.log { font-family: var(--font-mono); font-size: 0.82rem; display: grid; gap: 3px; }
+.log .t { color: var(--mut, var(--mut-charcoal)); }
+.log .last { color: var(--accent); }
+.quote { font-family: var(--font-display); font-style: italic; font-size: 1.05rem; }
+.quote cite { display: block; font-style: normal; font-size: 0.8rem; color: var(--mut, var(--mut-charcoal)); margin-top: var(--s-2); }
+
+.empty { color: var(--mut, var(--mut-charcoal)); }
+.future { opacity: 0.62; }
+.future .card__title::after { content: " · soon"; color: var(--accent-soft); }
+
+/* a cat, dropped into a card corner as flavor */
+.card__cat { position: absolute; right: var(--s-3); bottom: 0; width: 96px; height: auto; opacity: 0.95; pointer-events: none; }
+
+/* ══ Multi-axis card vocabulary ═══════════════════════════════════════════════
+   The composable system (brief §3): a card = independent axes (material · size ·
+   edge · label · repair · ornament), bundled by recipes in `card.rs`. Each axis
+   is a class token; decoration overhangs the card while the inner `.card__surface`
+   stays the clipping container so charts/grids never get clipped by the boro. */
+
+/* Cards keep `overflow: visible` so labels/repairs/ornaments can escape bounds
+   (brief §5). Anything needing a clip goes in `.panel` inside the surface. */
+.card { overflow: visible; }
+.card__surface { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; flex: 1 1 auto; container-type: inline-size;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5); } /* legibility over busy weave */
+.material--linen .card__surface { text-shadow: none; } /* dark text on light linen needs none */
+/* Reserve headroom so a top-straddling label never lands on the first content
+   line (the big stat values sit right at the surface top). */
+.card--label-escapes > .card__surface { padding-top: var(--s-5); }
+
+/* Material axis — surface + paired roles (brief §6/§7). Supersedes `.card--{name}`
+   (kept above for any un-migrated markup). */
+.material--linen      { --surface: var(--linen);      --on: var(--on-linen);      --mut: var(--mut-linen);      --stitch: var(--stitch-linen);      --mat-tex: url("/static/boro/materials/linen.webp"); }
+.material--charcoal   { --surface: var(--charcoal);   --on: var(--on-charcoal);   --mut: var(--mut-charcoal);   --stitch: var(--stitch-charcoal);   --mat-tex: url("/static/boro/materials/charcoal.webp"); }
+.material--faded-blue { --surface: var(--faded-blue); --on: var(--on-faded-blue); --mut: var(--mut-faded-blue); --stitch: var(--stitch-faded-blue); --mat-tex: url("/static/boro/materials/faded-blue.webp"); }
+.material--indigo     { --surface: var(--indigo);     --on: var(--on-indigo);     --mut: var(--mut-indigo);     --stitch: var(--stitch-indigo);     --mat-tex: url("/static/boro/materials/indigo.webp"); }
+.material--olive      { --surface: var(--olive);      --on: var(--on-olive);      --mut: var(--mut-olive);      --stitch: var(--stitch-olive);      --mat-tex: url("/static/boro/materials/olive.webp"); }
+.material--rust       { --surface: var(--rust);       --on: var(--on-rust);       --mut: var(--mut-rust);       --stitch: var(--stitch-rust);       --mat-tex: url("/static/boro/materials/rust.webp"); }
+
+/* Size axis (brief §23). `s`/`m` are single cells; the rest span the bento. */
+.card--s {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.card--m {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.card--wide {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.card--tall {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.card--hero {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+/* Edge axis (brief §11). Stitch is the base `.card::after`; `clean`/`frayed`
+   hide it, `frayed`/`stitched-frayed` add a fray fringe overlay (placeholder). */
+.card.edge--clean::after,
+.card.edge--frayed::after { display: none; }
+/* real frayed-edge overlay: a material-matched fray strip hanging off the bottom
+   edge, fibers extending past the card bound (brief §1/§5). */
+.card.edge--frayed::before,
+.card.edge--stitched-frayed::before {
+  content: ""; position: absolute; left: 5%; right: 5%; bottom: -15px; height: 42px;
+  z-index: 6; pointer-events: none;
+  background-image: var(--fray-asset); background-size: 100% 100%; background-repeat: no-repeat;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+}
+
+/* ── Label axis: REAL HTML text over a transparent cloth asset (brief §14) ───── */
+.card-label {
+  position: absolute; margin: 0; z-index: 20;
+  min-height: 2.4rem; display: grid; place-items: center; text-align: center;
+  font-family: var(--font-mono); font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--label-on, #f0e7d2);
+  /* the cloth (with its own stitched border + fray) is a stretched background;
+     the text sits centered inside its padding. */
+  background-image: var(--label-asset); background-size: 100% 100%; background-repeat: no-repeat;
+  padding: 0.5rem 1.15rem 0.6rem;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+/* label--{cloth} only sets the text color to suit the cloth actually shown */
+.label--linen      { --label-on: #2a2620; text-shadow: none; }
+.label--charcoal   { --label-on: var(--on-charcoal); }
+.label--faded-blue { --label-on: var(--on-faded-blue); }
+.label--indigo     { --label-on: #eae6f5; }
+.label--olive      { --label-on: var(--on-olive); }
+.label--rust       { --label-on: var(--on-rust); }
+
+/* Placement (brief §15). Each bakes in the variation offsets/rotation. */
+.label-placement--inset {
+  position: static; align-self: flex-start; margin-bottom: var(--s-2);
+  transform: translate(var(--label-dx, 0), var(--label-dy, 0)) rotate(var(--label-rot, 0deg));
+}
+.label-placement--edge {
+  top: 0; left: var(--s-5);
+  transform: translate(var(--label-dx, 0), calc(-52% + var(--label-dy, 0px))) rotate(var(--label-rot, 0deg));
+}
+.label-placement--overlap {
+  top: 0; left: var(--s-4);
+  transform: translate(calc(-14% + var(--label-dx, 0px)), calc(-48% + var(--label-dy, 0px))) rotate(var(--label-rot, 0deg));
+}
+.label-placement--floating {
+  top: 0; left: 50%;
+  transform: translate(calc(-50% + var(--label-dx, 0px)), calc(-118% + var(--label-dy, 0px))) rotate(var(--label-rot, 0deg));
+}
+
+/* Width (brief §16) — intentional, not purely text-sized. */
+.label-width--content { width: max-content; }
+.label-width--short   { min-width: 5rem; }
+.label-width--medium  { min-width: 8rem; }
+.label-width--long    { min-width: 12rem; }
+.label-width--sash    { min-width: 15rem; }
+
+/* ── Repair axis: a real transparent patch (color/shape/stitch in the asset) ─── */
+.repair {
+  position: absolute; z-index: 20; width: 92px; height: 92px; pointer-events: none;
+  background-image: var(--repair-asset); background-size: contain;
+  background-repeat: no-repeat; background-position: center;
+  transform: rotate(var(--repair-rot, -4deg));
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+}
+/* deliberate slot positions (overhang the card edge slightly) */
+.repair-pos--top-left     { top: -18px; left: -18px; }
+.repair-pos--top-right    { top: -18px; right: -18px; }
+.repair-pos--bottom-left  { bottom: -18px; left: -18px; }
+.repair-pos--bottom-right { bottom: -18px; right: -18px; }
+.repair-pos--left         { top: 50%; left: -22px; margin-top: -46px; }
+.repair-pos--right        { top: 50%; right: -22px; margin-top: -46px; }
+
+/* Ornament (Smeech) — real felt-cat sprite sitting on the card's bottom-right,
+   overhanging the edge a touch so he inhabits the card (brief §32/§34). */
+.card__ornament {
+  position: absolute; right: 6px; bottom: -6px; width: 136px; height: auto;
+  pointer-events: none; z-index: 30;
+  filter: drop-shadow(0 4px 5px rgba(0,0,0,0.4));
+}
+/* peek/drape poses read as coming over the TOP edge — sit them there instead */
+.card__ornament--watch-peek-ledge,
+.card__ornament--watch-peek-pocket,
+.card__ornament--rest-blanket { top: -30px; bottom: auto; right: 14px; width: 150px; }
+.card__ornament--watch-drape { top: -26px; bottom: auto; right: 10px; width: 150px; }
+
+/* Smeech perched over a label — he peeks over the top of the cloth tag (§34). */
+.label-smeech {
+  position: absolute; left: 50%; top: 0; width: 104px; height: auto;
+  transform: translate(-42%, -64%); z-index: 3; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+}
+
+/* ── Jagged silhouette (prototype): a rough-cut cloth-scrap card. The fabric is
+   painted on a torn-masked ::before behind the content, so the card reads as an
+   irregular scrap while the content box stays rectangular + unclipped (brief §7). */
+.card--jagged { background-color: transparent; background-image: none; box-shadow: none; }
+.card--jagged::before {
+  content: ""; position: absolute; inset: -10px; z-index: -1; pointer-events: none;
+  background-color: var(--surface); background-image: var(--mat-tex); background-size: 340px;
+  -webkit-mask: var(--torn-mask) center / 100% 100% no-repeat;
+          mask: var(--torn-mask) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
+}
+
+/* ── Decoration toggle: `.plain` on <body> silences the fabric so data mode is
+      one switch (also the accessibility / low-distraction escape hatch). Labels
+      keep their TEXT (they carry content) but shed texture/rotation. ─────────── */
+.plain .card { background-image: none; }
+.plain .card::before, .plain .card::after,
+.plain .card__ornament, .plain .brand__cat,
+.plain .repair { display: none; }
+/* labels keep their TEXT (they carry content) but shed the cloth + transforms */
+.plain .card-label {
+  background-image: none; filter: none; text-shadow: none; transform: none;
+  color: var(--on-charcoal); background: var(--bg-2);
+  border: 1px dashed color-mix(in srgb, var(--stitch-charcoal) 70%, transparent);
+  border-radius: 6px; padding: 0.3rem 0.7rem; min-height: 0;
+}
+
+/* ── Responsive: mobile-aware. Below the fold the grid is one clean column and
+      the nav sits on top. No bespoke layout — just relax the spans. ────────── */
+@media (max-width: 720px) {
+  .shell { flex-direction: column; gap: 0; }
+  .nav { position: static; flex-basis: auto; width: 100%; flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--s-3); border-right: 0; border-bottom: 1px dashed var(--stitch-charcoal); }
+  .brand { padding: 0; }
+  .brand__cat { display: none; }
+  .nav__links { flex-direction: row; }
+  .nav__status { margin: 0 0 0 auto; }
+  .container { padding: var(--s-4); width: 100%; }
+  .card--wide, .card--hero { grid-column: auto; }
+  .card--tall, .card--hero { grid-row: auto; }
+  /* patchwork collapses gracefully: repairs may drop where they'd collide, and
+     edge/overlap/floating labels tuck to the top so nothing hangs off-screen. */
+  .repair { display: none; }
+  .label-placement--edge, .label-placement--overlap, .label-placement--floating {
+    left: var(--s-3); transform: translateY(-48%) rotate(var(--label-rot, 0deg));
+  }
+}
+}

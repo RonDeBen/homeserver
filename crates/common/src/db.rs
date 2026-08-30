@@ -25,9 +25,7 @@ pub async fn connect(database_url: &str) -> Result<PgPool> {
                 warn!(attempt, error = %e, "postgres not ready, retrying in 1s");
                 tokio::time::sleep(Duration::from_secs(1)).await;
             }
-            Err(e) => {
-                return Err(e).context("connecting to postgres (gave up after retries)")
-            }
+            Err(e) => return Err(e).context("connecting to postgres (gave up after retries)"),
         }
     }
 }

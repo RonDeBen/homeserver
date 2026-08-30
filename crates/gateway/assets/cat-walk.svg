@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="132" height="72" viewBox="0 0 132 72">
+  <!-- Smeech walking, tail up. Used in the footer / empty states. -->
+  <g fill="#0c0d11">
+    <!-- body + tail -->
+    <path d="M24 44 C24 34 34 30 52 30 C74 30 92 30 100 32
+             C104 24 106 12 112 8 C116 6 120 8 118 14
+             C116 22 112 30 110 36 C112 46 108 52 96 52
+             L36 52 C28 52 24 50 24 44 Z"/>
+    <!-- head -->
+    <ellipse cx="28" cy="36" rx="13" ry="12"/>
+    <path d="M18 28 l-3 -10 l11 6 Z"/>
+    <path d="M34 27 l4 -10 l-11 7 Z"/>
+    <!-- legs -->
+    <rect x="40" y="50" width="6" height="18" rx="3"/>
+    <rect x="58" y="50" width="6" height="18" rx="3"/>
+    <rect x="80" y="50" width="6" height="18" rx="3"/>
+    <rect x="94" y="50" width="6" height="16" rx="3"/>
+  </g>
+  <!-- eye -->
+  <path d="M20 35 q5 -5 10 0 q-5 4 -10 0 Z" fill="#e6a63c"/>
+  <ellipse cx="25" cy="34.5" rx="1.3" ry="2.6" fill="#0c0d11"/>
+</svg>

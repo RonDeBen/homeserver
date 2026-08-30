@@ -102,7 +102,10 @@ pub async fn sync_schedules(db: &PgPool, specs: &[ScheduleSpec]) -> Result<()> {
         .execute(db)
         .await?;
     if pruned.rows_affected() > 0 {
-        info!(count = pruned.rows_affected(), "pruned schedules not in file");
+        info!(
+            count = pruned.rows_affected(),
+            "pruned schedules not in file"
+        );
     }
     Ok(())
 }
@@ -124,11 +127,12 @@ pub async fn insert_timer(db: &PgPool, timer: &TimerCreate) -> Result<()> {
 pub async fn tick(ctx: &Context) -> Result<(u64, u64)> {
     let now = Utc::now();
 
-    let due_schedules =
-        sqlx::query("SELECT id, cron, subject, payload FROM schedules WHERE enabled AND next_fire <= $1")
-            .bind(now)
-            .fetch_all(&ctx.db)
-            .await?;
+    let due_schedules = sqlx::query(
+        "SELECT id, cron, subject, payload FROM schedules WHERE enabled AND next_fire <= $1",
+    )
+    .bind(now)
+    .fetch_all(&ctx.db)
+    .await?;
     let mut fired_schedules = 0;
     for row in &due_schedules {
         let id: i64 = row.get("id");
@@ -178,10 +182,9 @@ pub async fn next_sleep(db: &PgPool) -> Result<Duration> {
         sqlx::query_scalar("SELECT min(next_fire) FROM schedules WHERE enabled")
             .fetch_one(db)
             .await?;
-    let next_timer: Option<DateTime<Utc>> =
-        sqlx::query_scalar("SELECT min(fire_at) FROM timers")
-            .fetch_one(db)
-            .await?;
+    let next_timer: Option<DateTime<Utc>> = sqlx::query_scalar("SELECT min(fire_at) FROM timers")
+        .fetch_one(db)
+        .await?;
 
     let soonest = [next_schedule, next_timer].into_iter().flatten().min();
     let dur = match soonest {

@@ -1,6 +1,22 @@
-# Infrastructure only. Jobs (calendar, etc.) run on the host via `cargo run`
-# for a fast dev loop; they'll get their own compose services once they're
-# long-running daemons rather than batch jobs.
+# Infra + the long-running daemons. Batch/CLI invocations (calendar run-once,
+# hsctl) are run ad-hoc, not defined here — e.g.
+#   docker compose exec orchestrator hsctl calendar refresh
+# reuses the same image and the compose network.
+
+# Shared config for the Rust jobs: how to reach infra by service name (the
+# internal Postgres port is 5432, not the host-mapped 5433).
+x-job-env: &job-env
+  DATABASE_URL: postgres://homeserver:homeserver@postgres:5432/homeserver
+  NATS_URL: nats://nats:4222
+  RUST_LOG: info
+
+# Jobs wait for a healthy Postgres; NATS connect retries on its own, so
+# service_started is enough there.
+x-infra-deps: &infra-deps
+  postgres:
+    condition: service_healthy
+  nats:
+    condition: service_started
 
 services:
   nats:
@@ -32,6 +48,56 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  orchestrator:
+    build: .
+    command: ["orchestrator"]
+    environment:
+      <<: *job-env
+      SCHEDULES_FILE: /app/deploy/schedules.toml
+    volumes:
+      # Mounted, not baked in: edit schedules and restart to re-sync, no rebuild.
+      - ./deploy/schedules.toml:/app/deploy/schedules.toml:ro
+    depends_on: *infra-deps
+    restart: unless-stopped
+
+  gateway:
+    build: .
+    command: ["gateway"]
+    environment:
+      <<: *job-env
+      # Auth is abstracted (crates/common/src/auth.rs). Default 'trusted' suits a
+      # private-network deploy (Tailscale/LAN); set AUTH_MODE=token + AUTH_TOKEN
+      # to require a bearer token when exposing this beyond a trusted network.
+      AUTH_MODE: ${AUTH_MODE:-trusted}
+      AUTH_TOKEN: ${AUTH_TOKEN:-}
+    ports:
+      - "8080:8080" # web dashboard + JSON API
+    depends_on: *infra-deps
+    restart: unless-stopped
+
+  calendar:
+    build: .
+    command: ["calendar", "serve"]
+    environment:
+      <<: *job-env
+      SOURCES_FILE: /app/crates/calendar/sources.toml
+      # Only used if the `ticketmaster` source is enabled; passed through from
+      # the host env / .env (empty is fine when that source isn't configured).
+      TICKETMASTER_API_KEY: ${TICKETMASTER_API_KEY:-}
+    volumes:
+      # Mounted, not baked in: edit sources and the next refresh picks them up.
+      - ./crates/calendar/sources.toml:/app/crates/calendar/sources.toml:ro
+    depends_on: *infra-deps
+    restart: unless-stopped
+
+  health:
+    build: .
+    command: ["health", "serve"]
+    environment:
+      <<: *job-env
+    depends_on: *infra-deps
+    restart: unless-stopped
 
 volumes:
   nats-data:

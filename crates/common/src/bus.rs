@@ -11,8 +11,15 @@ use crate::Context;
 /// Connect to NATS. Jobs publish/subscribe on this client; when we add
 /// durable streams later, JetStream is built on top of the same connection
 /// (`async_nats::jetstream::new(client)`).
+///
+/// `retry_on_initial_connect` so a job started alongside NATS (compose, reboot)
+/// waits for the broker instead of crashing — the NATS-side mirror of the
+/// Postgres connect retry. async-nats reconnects on its own after that.
 pub async fn connect(nats_url: &str) -> Result<Client> {
-    let client = async_nats::connect(nats_url).await?;
+    let client = async_nats::ConnectOptions::new()
+        .retry_on_initial_connect()
+        .connect(nats_url)
+        .await?;
     Ok(client)
 }
 
@@ -52,7 +59,8 @@ pub async fn publish_json<T: Serialize>(bus: &Client, subject: &str, payload: &T
 
 /// Handler after type-erasure: takes the shared context and the raw message,
 /// deserializes internally, returns the handler's future.
-type Route = Box<dyn Fn(Arc<Context>, async_nats::Message) -> BoxFuture<'static, Result<()>> + Send + Sync>;
+type Route =
+    Box<dyn Fn(Arc<Context>, async_nats::Message) -> BoxFuture<'static, Result<()>> + Send + Sync>;
 
 /// A job's bus wiring, read top-to-bottom as "what this job listens for and
 /// what each message triggers":

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="70" viewBox="0 0 120 70">
+  <!-- Smeech peeking over the bottom edge of a card: ears, head, two eyes,
+       two paws hooked over the rim. Anchored to the bottom of its box. -->
+  <g fill="#0c0d11">
+    <path d="M60 70 C34 70 20 54 20 34 C20 30 21 26 23 22 L33 34
+             C40 30 50 28 60 28 C70 28 80 30 87 34 L97 22
+             C99 26 100 30 100 34 C100 54 86 70 60 70 Z"/>
+    <!-- paws -->
+    <ellipse cx="44" cy="68" rx="8" ry="6"/>
+    <ellipse cx="76" cy="68" rx="8" ry="6"/>
+  </g>
+  <!-- eyes -->
+  <g fill="#e6a63c">
+    <path d="M46 46 q6 -7 12 0 q-6 5 -12 0 Z"/>
+    <path d="M62 46 q6 -7 12 0 q-6 5 -12 0 Z"/>
+  </g>
+  <g fill="#0c0d11">
+    <ellipse cx="52" cy="45.5" rx="1.5" ry="3"/>
+    <ellipse cx="68" cy="45.5" rx="1.5" ry="3"/>
+  </g>
+</svg>

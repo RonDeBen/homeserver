@@ -14,3 +14,5 @@ dotenvy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 futures.workspace = true
+http.workspace = true
+subtle.workspace = true

@@ -1,2 +1,8 @@
 /target
 .env
+.gateway-watch.pid
+.gateway-watch.log
+
+# Boro asset source masters (large PNGs); only optimized webp under crates/gateway/assets is committed
+/assets/
+/boro-gallery.html

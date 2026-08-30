@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- A second patch style: a rust/ochre calico scrap with a small floral repeat,
+       for variety in the corner of a card. Decorative only. -->
+  <defs>
+    <clipPath id="swatch2"><path d="M6 8 L114 12 L110 116 L10 110 Z"/></clipPath>
+    <g id="floret">
+      <circle r="3.4" fill="#e7c98f"/>
+      <g fill="#b8532f">
+        <circle cx="0" cy="-6" r="2.4"/><circle cx="0" cy="6" r="2.4"/>
+        <circle cx="-6" cy="0" r="2.4"/><circle cx="6" cy="0" r="2.4"/>
+      </g>
+    </g>
+  </defs>
+  <g clip-path="url(#swatch2)">
+    <rect width="120" height="120" fill="#7a3a26"/>
+    <rect width="120" height="120" fill="#6d3221"/>
+    <g opacity="0.92">
+      <use href="#floret" x="24" y="24"/><use href="#floret" x="72" y="24"/>
+      <use href="#floret" x="48" y="60"/><use href="#floret" x="96" y="60"/>
+      <use href="#floret" x="24" y="96"/><use href="#floret" x="72" y="96"/>
+    </g>
+  </g>
+  <path d="M6 8 L114 12 L110 116 L10 110 Z" fill="none" stroke="#2a120b" stroke-width="1.5" opacity="0.5"/>
+</svg>

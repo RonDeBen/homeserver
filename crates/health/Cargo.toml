@@ -1,0 +1,17 @@
+[package]
+name = "health"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+common = { path = "../common" }
+# For arming the fast-target ping via the orchestrator's durable one-shot timer.
+orchestrator = { path = "../orchestrator" }
+tokio.workspace = true
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+clap.workspace = true

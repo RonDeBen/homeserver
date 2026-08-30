@@ -1,0 +1,109 @@
+# Calendar sources — the source of truth for where events come from.
+#
+# The calendar re-reads this on every refresh pass, so editing it takes effect
+# on the next refresh (no restart needed). Each entry becomes one adapter:
+#
+#   id       stable slug; stored as the `source` column and used for dedup, so
+#            don't rename it casually (a rename re-imports everything as "new").
+#   name     human label (optional, for readers of this file).
+#   kind     "ical" | "rss" | "html" | "ticketmaster".
+#   url      the feed / page URL (required for ical/rss/html; unused by APIs).
+#   adapter  only for kind="html": which per-site scraper (sources/<adapter>.rs).
+#   params   adapter-specific, NON-SECRET knobs (e.g. Ticketmaster geo filters).
+#            Secrets (API keys) come from env vars, never this file.
+#
+# Adding a source:
+#   * an ICS or RSS feed -> add an entry below, done (no code).
+#   * an ugly HTML page  -> write sources/<adapter>.rs (copy sources/bears.rs),
+#     add an arm to `sources::build`, then add an entry here with that adapter.
+
+# --- Music discovery --------------------------------------------------------
+
+# Bear's on Fairfield — metal/punk/noise/DIY shows. Scraped from their Duda
+# events page; the Facebook event URL on each card is used as the stable id.
+[[source]]
+id      = "bears"
+name    = "Bear's on Fairfield"
+kind    = "html"
+adapter = "bears"
+url     = "https://www.bearsfairfield.com/upcoming-events"
+
+# Ticketmaster Discovery API — touring/mainstream shows near Shreveport, to
+# complement the venue scrape. Requires TICKETMASTER_API_KEY in the environment
+# (free key from https://developer.ticketmaster.com/). latlong is downtown
+# Shreveport; widen `radius` (miles) to reach farther.
+[[source]]
+id     = "ticketmaster-music"
+name   = "Ticketmaster (music near Shreveport)"
+kind   = "ticketmaster"
+params = { latlong = "32.5252,-93.7502", radius = "75", unit = "miles", classification_name = "music" }
+
+# --- Institutional calendars ------------------------------------------------
+
+# LSUS — CalendarWiz iCal feed (lectures, campus events, library programs).
+[[source]]
+id   = "lsus"
+name = "LSUS"
+kind = "ical"
+url  = "https://www.calendarwiz.com/CalendarWiz_iCal.php?crd=lsus"
+
+# Shreve Memorial Library (CivicPlus iCal feeds). Subscribed by TOPIC, not
+# branch — these pull the interesting adult/maker/social programming across all
+# branches and skip the storytime/teen/beginner-computer categories.
+#
+# All six share id = "shreve-library" on purpose: that's the `source` column, so
+# events that appear in more than one topic feed (a book club is both "Adult
+# Programs" and "Book Clubs") collapse to one row via dedup on (source, uid) —
+# the feeds carry stable, feed-independent UIDs. Add/remove a topic by editing
+# this list; other catIDs (by branch or topic) are on the site's iCalendar page.
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Adult Programs"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=59&feed=calendar"
+
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Genealogy"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=62&feed=calendar"
+
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Craft Classes"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=89&feed=calendar"
+
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Community Events"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=90&feed=calendar"
+
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Book Clubs"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=61&feed=calendar"
+
+[[source]]
+id   = "shreve-library"
+name = "Shreve Library — Make & Go Makerspace"
+kind = "ical"
+url  = "https://www.shreve-lib.org/common/modules/iCalendar/iCalendar.aspx?catID=80&feed=calendar"
+
+# --- Blocked / needs more work ----------------------------------------------
+
+# Downtown Shreveport / DDA (downtownshreveport.com/events) is behind a
+# Cloudflare bot challenge — a plain HTTP scraper gets a 403, and their ICS /
+# REST endpoints are challenge-gated too. Would need a headless browser or an
+# official un-gated feed; parked for now.
+
+# Visit Shreveport-Bossier (visitshreveportbossier.org) — Simpleview CMS.
+# Parked (low value): the /events/ list is client-side rendered from a JSON API
+# not visible in static HTML. There IS an RSS feed at /event/rss/, but it mixes
+# a few discrete dated events with many ongoing attractions/recurring classes
+# whose only date is a past "Starting M/D/Y" in free-text description, and it
+# carries no event times — poor for planning. If revisited, the right source is
+# the list-view JSON API endpoint (capture from browser devtools Network tab),
+# which returns clean discrete instances honoring the date-range filter.

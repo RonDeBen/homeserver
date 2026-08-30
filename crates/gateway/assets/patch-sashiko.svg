@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <!-- A corner "patch": a swatch of indigo cloth mended over the card, with
+       sashiko running-stitch in a hitomezashi star. Decorative only. -->
+  <defs>
+    <clipPath id="swatch"><path d="M8 14 L112 6 L116 108 L6 114 Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#swatch)">
+    <rect width="120" height="120" fill="#26324a"/>
+    <rect width="120" height="120" fill="#1d2942"/>
+    <g stroke="#c9b98a" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.85"
+       stroke-dasharray="7 6">
+      <path d="M20 24 H108"/><path d="M14 44 H108"/><path d="M20 64 H108"/>
+      <path d="M14 84 H108"/><path d="M20 104 H108"/>
+      <path d="M28 8 V116"/><path d="M50 4 V116"/><path d="M72 6 V116"/><path d="M94 6 V114"/>
+    </g>
+    <g stroke="#e6d7a6" stroke-width="2.6" stroke-linecap="round" fill="none">
+      <path d="M61 40 L61 80"/><path d="M41 60 L81 60"/>
+      <path d="M47 46 L75 74"/><path d="M75 46 L47 74"/>
+    </g>
+  </g>
+  <path d="M8 14 L112 6 L116 108 L6 114 Z" fill="none" stroke="#0e1626" stroke-width="1.5" opacity="0.5"/>
+</svg>
